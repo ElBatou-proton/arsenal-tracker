@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Filament\Resources\Ranks\Pages;
+
+use App\Filament\Resources\Ranks\RankResource;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ViewRecord;
+
+class ViewRank extends ViewRecord
+{
+    protected static string $resource = RankResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
+    }
+}

@@ -1,0 +1,59 @@
+FROM php:8.5-fpm-alpine
+
+# Install system dependencies with retry mechanism
+RUN apk update && \
+    for i in 1 2 3; do \
+        apk add --no-cache \
+            git \
+            curl \
+            libpng-dev \
+            oniguruma-dev \
+            libxml2-dev \
+            zip \
+            unzip \
+            mysql-client \
+            supervisor \
+            nginx \
+            icu-dev \
+            icu-data-full \
+            libzip-dev \
+            && break || sleep 5; \
+    done
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip
+
+# Create www-data user if it doesn't exist
+#RUN addgroup -g 82 -S www-data && \
+#    adduser -u 82 -D -S -G www-data www-data
+
+# Get latest Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy existing application directory contents first
+COPY . /var/www/html
+
+# Install PHP dependencies
+RUN composer update --no-dev --optimize-autoloader --no-interaction
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache \
+    && chmod -R 755 /var/www/html/public
+
+# Copy startup script
+COPY startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+
+# Expose port 9000 for php-fpm
+EXPOSE 9000
+
+# Copy supervisor configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Run startup script only on first launch, then start supervisor
+CMD ["/bin/sh", "-c", "if [ ! -f /var/www/html/.app_initialized ]; then echo 'First-time startup detected, running initialization...' && /usr/local/bin/startup.sh && touch /var/www/html/.app_initialized && echo 'Initialization completed, starting supervisor...'; else echo 'Application already initialized, starting supervisor...'; fi && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]

@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Military Color Palette */
+    --color-olive-drab: #556B2F;
+    --color-olive-drab-700: #4A5C28;
+    --color-army-green: #4B5320;
+    --color-dark-khaki: #6B5B4A;
+    --color-military-black: #2C2C2C;
+    --color-sand: #C2B280;
+    --color-sand-100: #F5F5DC;
+}
